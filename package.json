@@ -1,13 +1,9 @@
 {
   "name": "smartbot-cache",
-  "version": "1.0.0",
-  "description": "Bot Cache Layer — ลดค่า AI API 60-80%",
+  "version": "4.0.0",
+  "description": "Production-Grade AI Cache — Multi-Model Router with Fallback",
   "main": "server.js",
-  "scripts": {
-    "start": "node server.js"
-  },
-  "engines": {
-    "node": ">=18.0.0"
-  },
+  "scripts": { "start": "node server.js" },
+  "engines": { "node": ">=18.0.0" },
   "license": "MIT"
 }
