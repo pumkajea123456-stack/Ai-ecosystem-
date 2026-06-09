@@ -200,14 +200,14 @@ PORT=${PORT:-3000}
 
 sleep 1
 
-cat << EOF
+cat << 'EOF'
 
 ╔════════════════════════════════════════════════════════╗
 ║                                                        ║
 ║         🚀 SmartBot Cache Server Started! 🚀          ║
 ║                                                        ║
 ║  ✅ Version: v4.0.0                                   ║
-║  ✅ URL: http://localhost:$PORT                        ║
+║  ✅ URL: http://localhost:3000                        ║
 ║  ✅ Models: Gemini | DeepSeek | Claude                ║
 ║  ✅ Cache: Smart Multi-Model Routing                  ║
 ║  ✅ Status: Running & Ready                           ║
@@ -215,23 +215,23 @@ cat << EOF
 ║  📊 Quick Test Commands (Open new terminal):          ║
 ║                                                        ║
 ║  Health Check:                                        ║
-║  $ curl http://localhost:$PORT/health                 ║
+║  $ curl http://localhost:3000/health                 ║
 ║                                                        ║
 ║  Statistics:                                          ║
-║  $ curl http://localhost:$PORT/stats                  ║
+║  $ curl http://localhost:3000/stats                  ║
 ║                                                        ║
 ║  Send Query (Test #1 - Cache Miss):                   ║
-║  $ curl -X POST http://localhost:$PORT/query \\       ║
-║    -H "Content-Type: application/json" \\             ║
+║  $ curl -X POST http://localhost:3000/query \        ║
+║    -H "Content-Type: application/json" \             ║
 ║    -d '{"query": "What is AI?"}'                      ║
 ║                                                        ║
 ║  Repeat Query (Test #2 - Cache Hit - ⚡FAST):         ║
-║  $ curl -X POST http://localhost:$PORT/query \\       ║
-║    -H "Content-Type: application/json" \\             ║
+║  $ curl -X POST http://localhost:3000/query \        ║
+║    -H "Content-Type: application/json" \             ║
 ║    -d '{"query": "What is AI?"}'                      ║
 ║                                                        ║
 ║  View Cache Info:                                     ║
-║  $ curl http://localhost:$PORT/cache/info             ║
+║  $ curl http://localhost:3000/cache/info             ║
 ║                                                        ║
 ║  📚 More Tests: See TESTING-GUIDE.md                  ║
 ║  📖 Integration: See INTEGRATION-GUIDE.md             ║
