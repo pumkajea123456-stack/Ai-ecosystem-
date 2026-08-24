@@ -1,0 +1,22 @@
+{
+  "version": "1.0",
+  "default_mode": "policy_gated",
+  "agents": {
+    "ceo": {"department": "executive", "role": "strategy", "permissions": ["strategy.read", "strategy.write"]},
+    "research": {"department": "research", "role": "market_intelligence", "permissions": ["public_data.read", "market.read"]},
+    "product": {"department": "product", "role": "product_lifecycle", "permissions": ["product.read", "product.write"]},
+    "marketing": {"department": "marketing", "role": "growth", "permissions": ["campaign.read", "campaign.write"]},
+    "sales": {"department": "sales", "role": "crm", "permissions": ["crm.read", "crm.write"]},
+    "finance": {"department": "finance", "role": "financial_intelligence", "permissions": ["finance.read"]},
+    "operations": {"department": "operations", "role": "operations", "permissions": ["operations.read", "operations.write"]},
+    "security": {"department": "security", "role": "security_sentinel", "permissions": ["security.read", "security.respond"]},
+    "engineering": {"department": "engineering", "role": "software_delivery", "permissions": ["code.read", "code.test", "deploy.request"]}
+  },
+  "restricted_actions": [
+    "financial_transaction",
+    "credential_rotation",
+    "production_destructive_change",
+    "industrial_safety_control",
+    "permission_policy_change"
+  ]
+}

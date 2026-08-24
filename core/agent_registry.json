@@ -1,0 +1,21 @@
+{
+  "version": "1.0",
+  "agents": [
+    {"id":"ceo","department":"strategy","role":"head","permissions":["strategy.read","strategy.write"]},
+    {"id":"research","department":"research","role":"worker","permissions":["market.read","public_data.read"]},
+    {"id":"product","department":"product","role":"worker","permissions":["product.read","product.write"]},
+    {"id":"marketing","department":"marketing","role":"worker","permissions":["campaign.read","campaign.write"]},
+    {"id":"sales","department":"sales","role":"worker","permissions":["crm.read","crm.write"]},
+    {"id":"finance","department":"finance","role":"head","permissions":["finance.read"]},
+    {"id":"operations","department":"operations","role":"head","permissions":["operations.read","inventory.read"]},
+    {"id":"security","department":"security","role":"head","permissions":["security.read","security.respond"]},
+    {"id":"engineering","department":"engineering","role":"head","permissions":["code.read","code.test","deploy.request"]}
+  ],
+  "restricted_actions": [
+    "financial.transfer",
+    "production.deploy",
+    "industrial.safety_control",
+    "credential.export",
+    "policy.modify"
+  ]
+}

@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "AutonomousTask",
+  "type": "object",
+  "required": ["task_id", "agent", "objective", "risk", "audit", "rollback"],
+  "properties": {
+    "task_id": {"type":"string"},
+    "agent": {"type":"string"},
+    "objective": {"type":"string"},
+    "risk": {"enum":["low","medium","high","critical"]},
+    "audit": {"const":true},
+    "rollback": {"const":true},
+    "permissions": {"type":"array","items":{"type":"string"}},
+    "parameters": {"type":"object"}
+  },
+  "additionalProperties": false
+}

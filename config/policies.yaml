@@ -1,0 +1,45 @@
+version: 1
+mode: policy_gated
+
+defaults:
+  least_privilege: true
+  audit: true
+  rollback_required_for_mutations: true
+  sandbox_untrusted_code: true
+
+limits:
+  max_task_runtime_seconds: 900
+  max_retries: 2
+  max_external_requests_per_minute: 120
+  max_autonomous_daily_spend: 0
+
+actions:
+  read_public_data:
+    autonomous: true
+    permissions: [public_data.read]
+  create_content:
+    autonomous: true
+    permissions: [content.write]
+  modify_campaign:
+    autonomous: true
+    permissions: [campaign.write]
+    requires_budget_policy: true
+  deploy_production:
+    autonomous: false
+    permissions: [deploy.request]
+    requires_tests: true
+    requires_security_scan: true
+    requires_canary: true
+    rollback: true
+  financial_transaction:
+    autonomous: false
+    permissions: [finance.execute]
+    requires_authorization: true
+  industrial_safety_control:
+    autonomous: false
+    permissions: [industrial.safety.execute]
+    requires_safety_interlock: true
+    requires_authorization: true
+  permission_policy_change:
+    autonomous: false
+    requires_authorization: true

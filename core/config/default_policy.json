@@ -1,0 +1,30 @@
+{
+  "version": "1.0",
+  "default_mode": "observe_and_recommend",
+  "allowed_actions": [
+    "telemetry.read",
+    "market.read",
+    "product.read",
+    "product.write",
+    "crm.read",
+    "crm.write",
+    "campaign.read",
+    "finance.read",
+    "inventory.read",
+    "code.read",
+    "code.test"
+  ],
+  "restricted_actions": [
+    "financial.transfer",
+    "production.deploy",
+    "industrial.safety_control",
+    "credential.export",
+    "policy.modify"
+  ],
+  "limits": {
+    "max_concurrent_tasks": 8,
+    "max_retries": 2,
+    "require_audit": true,
+    "require_rollback": true
+  }
+}
