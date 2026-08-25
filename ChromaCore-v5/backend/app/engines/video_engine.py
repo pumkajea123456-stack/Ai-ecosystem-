@@ -19,11 +19,17 @@ def inspect_video(data: bytes, filename: str = 'input.bin') -> dict:
 
 
 def transcode_video(data: bytes, filename: str='input.bin', output_format: str='mp4', video_codec: str='libx264', audio_codec: str='aac') -> dict:
+    # Validate caller-controlled options before checking host dependencies so contract
+    # errors remain deterministic in local and CI environments.
+    if output_format not in {'mp4','webm','mkv'}:
+        return {'engine':'ffmpeg','status':'invalid_format','format':output_format}
+    if video_codec not in {'libx264','libvpx-vp9','libx265'}:
+        return {'engine':'ffmpeg','status':'invalid_video_codec','video_codec':video_codec}
+    if audio_codec not in {'aac','libopus'}:
+        return {'engine':'ffmpeg','status':'invalid_audio_codec','audio_codec':audio_codec}
     ffmpeg=shutil.which('ffmpeg')
-    if not ffmpeg: return {'engine':'ffmpeg','available':False,'status':'dependency_missing'}
-    if output_format not in {'mp4','webm','mkv'}: return {'engine':'ffmpeg','status':'invalid_format','format':output_format}
-    if video_codec not in {'libx264','libvpx-vp9','libx265'}: return {'engine':'ffmpeg','status':'invalid_video_codec','video_codec':video_codec}
-    if audio_codec not in {'aac','libopus'}: return {'engine':'ffmpeg','status':'invalid_audio_codec','audio_codec':audio_codec}
+    if not ffmpeg:
+        return {'engine':'ffmpeg','available':False,'status':'dependency_missing'}
     suffix=Path(filename).suffix or '.bin'
     with tempfile.TemporaryDirectory() as td:
         src=Path(td)/f'input{suffix}'; out=Path(td)/f'output.{output_format}'; src.write_bytes(data)
