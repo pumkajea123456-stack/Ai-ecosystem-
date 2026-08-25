@@ -2,35 +2,38 @@
 
 | Layer | Status | Evidence / next action |
 |---|---|---|
-| Frontend | Scaffolded | `frontend/README.md`; UI implementation remains |
-| Backend/API Gateway | Integrated | FastAPI + job lifecycle + health checks |
-| PostgreSQL | Connected | Runtime schema and persistent jobs in `backend/app/db.py` |
-| Redis | Connected | Queue and worker in `backend/app/worker.py` |
-| Background Worker | Integrated | queued → processing → completed lifecycle |
-| Local Object Storage | Working | `backend/app/storage.py`; production object storage remains |
-| AI Vision | Adapter boundary | Production model/weights/API still required |
-| Video Engine | Adapter boundary | Production transcoder/model still required |
-| Batch Engine | Worker-backed | Processing contract is live; domain-specific processors remain |
-| MCP Server | Tool contracts | SDK/server transport integration remains |
-| Mobile | Client boundary | Mobile client implementation remains |
-| Deployment | Docker Compose | API/worker/PostgreSQL/Redis wired |
-| CI | Integration workflow added | GitHub Actions now provisions PostgreSQL + Redis and runs tests |
-| Production AI models | Not configured | Requires selected model, weights or provider credentials |
+| Frontend | Scaffolded | UI implementation remains |
+| Backend/API Gateway | Integrated | FastAPI + persistent jobs + health checks |
+| PostgreSQL | Connected | Persistent job records |
+| Redis | Connected | Queue and worker |
+| Background Worker | Integrated | queued → processing → completed |
+| Local Object Storage | Working | Local adapter; production object storage remains |
+| Image inspection | Working | Pillow-backed validation |
+| Semantic Vision | Pluggable | `vision_engine.py`; enable with a selected Transformers model and dependencies |
+| Video inspection | Working | FFprobe-backed validation |
+| Video transcoding | Implemented | FFmpeg adapter with validated codecs/formats |
+| Batch Engine | Worker-backed | Queue orchestration; domain processors remain |
+| MCP Server | Tool contracts | Production SDK transport/auth integration remains |
+| Mobile | Client boundary | Mobile implementation remains |
+| Deployment | Docker baseline | FFmpeg included; production orchestration remains |
+| CI | Passing baseline | PostgreSQL + Redis + engine/API tests pass on latest validated commit |
+| Production AI model | Not activated | Requires explicit model selection, weights/provider and runtime dependencies |
 | Production object storage | Not configured | Requires provider and credentials |
 | Billing/Marketplace/Enterprise | Not implemented | Requires business rules, auth and provider configuration |
 
 ## Current validation state
 
-The code has been updated to remove the previous API/test lifecycle mismatch and to connect API job creation to PostgreSQL and Redis. CI now tests the database and queue dependencies rather than testing only an isolated Python process.
+The production-step branch now contains executable media engines: Pillow image inspection, FFprobe video inspection, FFmpeg transcoding, and a configurable semantic-vision adapter. API routes expose these capabilities and contract tests cover their deterministic behavior.
 
-A GitHub Actions run is still required to establish external CI evidence for the latest commit. No claim of CI success is made until GitHub reports a completed successful run.
+Semantic inference is intentionally configuration-driven. The system must not claim detections when no model is configured. Set `CHROMACORE_VISION_BACKEND=transformers` and `CHROMACORE_VISION_MODEL=<approved-model>` and install the matching Transformers runtime before enabling inference.
 
 ## Remaining production work
 
-1. Select and configure the real AI Vision model/provider.
-2. Add real video processing/transcoding adapter.
-3. Replace local storage with production object storage.
-4. Implement authenticated MCP transport.
-5. Implement billing, marketplace and enterprise authorization rules.
-6. Add end-to-end tests for image, video and batch processing.
-7. Run CI and fix any environment-specific failures before merging to `main`.
+1. Select and approve a semantic vision model and add its production runtime/deployment strategy.
+2. Add real image object-detection/segmentation output if required by the product contract.
+3. Add end-to-end video transcode tests with a generated fixture and artifact verification.
+4. Replace local storage with production object storage.
+5. Implement authenticated MCP transport.
+6. Implement authentication/RBAC, billing, marketplace and enterprise policies.
+7. Add observability, rate limits, quotas and production secrets management.
+8. Run full E2E validation and merge only after the production-step CI is green.

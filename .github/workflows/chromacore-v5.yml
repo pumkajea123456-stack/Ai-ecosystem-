@@ -1,7 +1,7 @@
 name: ChromaCore v5 CI
 on:
   push:
-    branches: [chromacore-v5]
+    branches: [chromacore-v5-production-step]
     paths: ['ChromaCore-v5/**']
   pull_request:
     paths: ['ChromaCore-v5/**']
@@ -32,6 +32,7 @@ jobs:
       DATABASE_URL: postgresql+psycopg://chromacore:chromacore_dev@localhost:5432/chromacore
       REDIS_URL: redis://localhost:6379/0
       PYTHONPATH: ${{ github.workspace }}/ChromaCore-v5/backend
+      CHROMACORE_VISION_BACKEND: mock
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
