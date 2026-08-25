@@ -4,6 +4,8 @@ from .jobs import create_job, get_job, list_jobs, update_job
 from .storage import save_bytes
 from .db import init_db, db_up, put_job, get_db_job
 from .worker import enqueue, redis_up
+from .engines.image_engine import inspect_image
+from .engines.video_engine import inspect_video
 
 app=FastAPI(title='ChromaCore v5',version='5.0.0')
 class BatchRequest(BaseModel): items:list[str]
@@ -16,16 +18,20 @@ def startup():
 def health(): return {'status':'ok','service':'chromacore-v5','postgres':db_up(),'redis':redis_up()}
 @app.post('/v5/process-image')
 async def process_image(file:UploadFile=File(...)):
-    job=create_job('image',{'filename':file.filename}); data=await file.read(); path=save_bytes(job['job_id'],file.filename or 'upload.bin',data)
-    update_job(job['job_id'],status='queued',input_ref=path,bytes=len(data))
-    try: put_job(job['job_id'],'image','queued',path,{'filename':file.filename,'bytes':len(data)}); enqueue(job['job_id'])
+    data=await file.read()
+    try: engine_result=inspect_image(data)
+    except Exception as exc: raise HTTPException(status_code=415,detail=f'unsupported image: {exc}')
+    job=create_job('image',{'filename':file.filename}); path=save_bytes(job['job_id'],file.filename or 'upload.bin',data)
+    update_job(job['job_id'],status='queued',input_ref=path,bytes=len(data),engine=engine_result)
+    try: put_job(job['job_id'],'image','queued',path,{'filename':file.filename,'bytes':len(data),'engine':engine_result}); enqueue(job['job_id'])
     except Exception: pass
     return get_job(job['job_id'])
 @app.post('/v5/process-video')
 async def process_video(file:UploadFile=File(...)):
-    job=create_job('video',{'filename':file.filename}); data=await file.read(); path=save_bytes(job['job_id'],file.filename or 'upload.bin',data)
-    update_job(job['job_id'],status='queued',input_ref=path,bytes=len(data),engine='video')
-    try: put_job(job['job_id'],'video','queued',path,{'filename':file.filename,'bytes':len(data)}); enqueue(job['job_id'])
+    data=await file.read(); engine_result=inspect_video(data,file.filename or 'input.bin')
+    job=create_job('video',{'filename':file.filename}); path=save_bytes(job['job_id'],file.filename or 'upload.bin',data)
+    update_job(job['job_id'],status='queued',input_ref=path,bytes=len(data),engine=engine_result)
+    try: put_job(job['job_id'],'video','queued',path,{'filename':file.filename,'bytes':len(data),'engine':engine_result}); enqueue(job['job_id'])
     except Exception: pass
     return get_job(job['job_id'])
 @app.post('/v5/batch-process')
@@ -35,7 +41,7 @@ def batch_process(req:BatchRequest):
     except Exception: pass
     return get_job(job['job_id'])
 @app.post('/v5/analyze-scene')
-def analyze_scene(): return {'status':'analyzed','objects':[],'confidence':0.0,'note':'Vision model adapter not configured.'}
+def analyze_scene(): return {'status':'adapter_ready','objects':[],'confidence':0.0,'note':'Connect a selected vision model adapter for semantic detection.'}
 @app.post('/v5/generate-preset')
 def generate_preset(req:PresetRequest): return {'name':req.name,'target':req.target,'preset':{'resize':'auto','quality':85,'format':'auto'}}
 @app.get('/v5/jobs')
