@@ -1,6 +1,7 @@
 name: ChromaCore v5 CI
 on:
   push:
+    branches: [chromacore-v5]
     paths: ['ChromaCore-v5/**']
   pull_request:
     paths: ['ChromaCore-v5/**']
@@ -10,10 +11,32 @@ jobs:
     defaults:
       run:
         working-directory: ChromaCore-v5/backend
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_DB: chromacore
+          POSTGRES_USER: chromacore
+          POSTGRES_PASSWORD: chromacore_dev
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd="pg_isready -U chromacore -d chromacore"
+          --health-interval=5s --health-timeout=5s --health-retries=10
+      redis:
+        image: redis:7-alpine
+        ports: ['6379:6379']
+        options: >-
+          --health-cmd="redis-cli ping"
+          --health-interval=5s --health-timeout=5s --health-retries=10
+    env:
+      DATABASE_URL: postgresql+psycopg://chromacore:chromacore_dev@localhost:5432/chromacore
+      REDIS_URL: redis://localhost:6379/0
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
       - run: pip install -r requirements.txt
+      - run: python -c "from app.db import init_db; init_db(); print('postgres ok')"
+      - run: python -c "from app.worker import redis_up; assert redis_up(); print('redis ok')"
       - run: pytest tests -q
