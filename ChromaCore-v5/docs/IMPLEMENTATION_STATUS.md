@@ -1,25 +1,36 @@
 # ChromaCore v5 implementation status
 
-| Layer | Status | Evidence |
+| Layer | Status | Evidence / next action |
 |---|---|---|
-| Frontend | Scaffolded | `frontend/README.md` |
-| Backend/API Gateway | Executable scaffold | `backend/app/main.py` |
-| AI Vision | Service boundary | `ai_vision/README.md` |
-| Video Engine | Service boundary | `video_engine/README.md` |
-| Batch Engine | Queue boundary | `batch_engine/README.md` |
-| MCP Server | Tool contracts | `mcp_server/server.py` |
-| Mobile | Client boundary | `mobile/README.md` |
-| Database | Persistence boundary | `database/README.md` |
-| Deployment | Docker Compose baseline | `deployment/docker-compose.yml` |
-| Production AI models | Not configured | Requires model selection/weights/API credentials |
+| Frontend | Scaffolded | `frontend/README.md`; UI implementation remains |
+| Backend/API Gateway | Integrated | FastAPI + job lifecycle + health checks |
+| PostgreSQL | Connected | Runtime schema and persistent jobs in `backend/app/db.py` |
+| Redis | Connected | Queue and worker in `backend/app/worker.py` |
+| Background Worker | Integrated | queued → processing → completed lifecycle |
+| Local Object Storage | Working | `backend/app/storage.py`; production object storage remains |
+| AI Vision | Adapter boundary | Production model/weights/API still required |
+| Video Engine | Adapter boundary | Production transcoder/model still required |
+| Batch Engine | Worker-backed | Processing contract is live; domain-specific processors remain |
+| MCP Server | Tool contracts | SDK/server transport integration remains |
+| Mobile | Client boundary | Mobile client implementation remains |
+| Deployment | Docker Compose | API/worker/PostgreSQL/Redis wired |
+| CI | Integration workflow added | GitHub Actions now provisions PostgreSQL + Redis and runs tests |
+| Production AI models | Not configured | Requires selected model, weights or provider credentials |
 | Production object storage | Not configured | Requires provider and credentials |
-| Billing/Marketplace/Enterprise | Interface not implemented | Requires business rules and provider configuration |
+| Billing/Marketplace/Enterprise | Not implemented | Requires business rules, auth and provider configuration |
 
-## Validation sequence
+## Current validation state
 
-1. Install `backend/requirements.txt`.
-2. Run `pytest backend/tests`.
-3. Run `uvicorn app.main:app --app-dir backend --reload`.
-4. Verify `/health`, `/v5/account`, `/v5/usage`.
-5. Exercise image/video upload and batch/preset endpoints.
-6. Only after smoke tests pass, attach PostgreSQL/Redis workers and production model adapters.
+The code has been updated to remove the previous API/test lifecycle mismatch and to connect API job creation to PostgreSQL and Redis. CI now tests the database and queue dependencies rather than testing only an isolated Python process.
+
+A GitHub Actions run is still required to establish external CI evidence for the latest commit. No claim of CI success is made until GitHub reports a completed successful run.
+
+## Remaining production work
+
+1. Select and configure the real AI Vision model/provider.
+2. Add real video processing/transcoding adapter.
+3. Replace local storage with production object storage.
+4. Implement authenticated MCP transport.
+5. Implement billing, marketplace and enterprise authorization rules.
+6. Add end-to-end tests for image, video and batch processing.
+7. Run CI and fix any environment-specific failures before merging to `main`.
