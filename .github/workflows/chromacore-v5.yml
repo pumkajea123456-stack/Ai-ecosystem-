@@ -1,7 +1,7 @@
 name: ChromaCore v5 CI
 on:
   push:
-    branches: [chromacore-v5]
+    branches: [chromacore-v5-production-step]
     paths: ['ChromaCore-v5/**']
   pull_request:
     paths: ['ChromaCore-v5/**']
