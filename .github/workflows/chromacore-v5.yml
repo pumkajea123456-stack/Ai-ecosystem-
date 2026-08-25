@@ -1,0 +1,19 @@
+name: ChromaCore v5 CI
+on:
+  push:
+    paths: ['ChromaCore-v5/**']
+  pull_request:
+    paths: ['ChromaCore-v5/**']
+jobs:
+  backend:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ChromaCore-v5/backend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install -r requirements.txt
+      - run: pytest tests -q
