@@ -1,7 +1,7 @@
 """Policy-gated execution runtime for the Autonomous Industrial Core.
 
-The runtime separates AI recommendations from consequential execution. Every
-job is validated against an explicit allow-list and produces an audit event.
+The runtime separates recommendations from consequential execution. Durable
+storage is optional; when configured, task and audit records survive restarts.
 """
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
@@ -36,11 +36,12 @@ class PolicyEngine:
 
 
 class AuditLog:
-    def __init__(self):
+    def __init__(self, store=None):
         self.events: List[Dict[str, Any]] = []
+        self.store = store
 
     def record(self, task: Task, decision: PolicyDecision, result: Any = None):
-        self.events.append({
+        event = {
             "timestamp": datetime.now(timezone.utc).isoformat(),
             "task_id": task.task_id,
             "agent": task.agent,
@@ -48,23 +49,43 @@ class AuditLog:
             "allowed": decision.allowed,
             "reason": decision.reason,
             "result": result,
-        })
+        }
+        self.events.append(event)
+        if self.store is not None:
+            self.store.record_audit(event)
 
 
 class AutonomousRuntime:
-    def __init__(self, policy: PolicyEngine):
+    def __init__(self, policy: PolicyEngine, store=None):
         self.policy = policy
-        self.audit = AuditLog()
+        self.store = store
+        self.audit = AuditLog(store=store)
 
     def authorize(self, task: Task) -> PolicyDecision:
+        if self.store is not None:
+            self.store.save_task(task, status="authorized_pending")
         decision = self.policy.evaluate(task)
         self.audit.record(task, decision)
+        if self.store is not None:
+            self.store.update_task_status(
+                task.task_id, "authorized" if decision.allowed else "denied"
+            )
         return decision
 
     def execute(self, task: Task, executor):
         decision = self.authorize(task)
         if not decision.allowed:
             raise PermissionError(decision.reason)
-        result = executor(task)
+        if self.store is not None:
+            self.store.update_task_status(task.task_id, "running")
+        try:
+            result = executor(task)
+        except Exception as exc:
+            if self.store is not None:
+                self.store.update_task_status(task.task_id, "failed")
+            self.audit.record(task, decision, {"error": type(exc).__name__})
+            raise
+        if self.store is not None:
+            self.store.update_task_status(task.task_id, "completed")
         self.audit.record(task, decision, result)
         return result
